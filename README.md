@@ -1,4 +1,6 @@
-# Cropped Image Sequence Generator
+# Image Sequence Generator
+
+Python project for converting a video into a sequence of images filtered by classification. Simply add a trained model, input your classes and the video will be converted into a sequence of images filtered to ones that contain the categories specified
 
 ## Installation
 Download Pipenv and Python3.7
