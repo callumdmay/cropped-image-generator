@@ -1,0 +1,13 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[packages]
+numpy = "*"
+opencv-python = "*"
+protobuf = "*"
+pillow = "*"
+tensorflow = "==1.14"
+
+[dev-packages]
+pylint = "*"
