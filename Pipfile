@@ -11,3 +11,6 @@ tensorflow = "==1.14"
 
 [dev-packages]
 pylint = "*"
+
+[requires]
+python_version = "3.7"
