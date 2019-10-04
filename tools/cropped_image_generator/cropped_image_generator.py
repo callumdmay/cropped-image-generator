@@ -38,42 +38,54 @@ class CroppedImageGenerator:
     def process_video(self, video_frames, path):
         with self.detection_graph.as_default():
             with tf.Session(graph=self.detection_graph) as sess:
-                # Definite input and output Tensors for detection_graph
-                image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
-
-                # Each box represents a part of the image where a particular object was detected.
-                detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
-
-                # Each score represent how level of confidence for each of the objects.
-                # Score is shown on the result image, together with the class label.
-                detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
-                detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
-                num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
+                
 
                 image_processor = ImageProcessor()
                 print("Running image sequence object detection...")
+                found_person = False
+                counter = 0
                 for index, image_np in enumerate(video_frames):
-                    if index < 48:
+                    # If we found an object in the last frame, skip 8 frames to reduce duplicates
+                    if (counter > 0):
+                        counter -= 1
                         continue
+                    if(found_person):
+                        counter = 8
+                        found_person = False
+
                     sys.stdout.write("\rProcessed: {0}".format(index))
                     sys.stdout.flush()
+
                     #Reverse RGB encoding
                     image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB).astype('uint8')
-                    image_pil = Image.fromarray(image_np)
 
                     # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                     image_np_expanded = np.expand_dims(image_np, axis=0)
                     # Actual detection.
-                    (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores,
-                                                              detection_classes, num_detections],
-                                                             feed_dict={image_tensor: image_np_expanded})
+                    (boxes, scores, classes, num) = self.detect_objects(sess, image_np_expanded)
 
                     # Processing result
-                    image_processor.process_image(
-                        image_pil,
+                    found_person = image_processor.process_image(
+                        Image.fromarray(image_np),
                         np.squeeze(boxes),
                         np.squeeze(classes).astype(np.int32),
                         np.squeeze(scores),
                         self.category_index,
                         path
                         )
+    
+    def detect_objects(self, session, image):
+        # Definite input and output Tensors for detection_graph
+        image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
+
+        # Each box represents a part of the image where a particular object was detected.
+        detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
+
+        # Each score represent how level of confidence for each of the objects.
+        # Score is shown on the result image, together with the class label.
+        detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
+        detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
+        num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
+        return session.run([detection_boxes, detection_scores, 
+                     detection_classes, num_detections],
+                     feed_dict={image_tensor: image})
