@@ -1,6 +1,6 @@
 # Image Sequence Generator
 
-Python project for converting a video into a sequence of images filtered by classification. Simply add a trained model, input your classes and the video will be converted into a sequence of images filtered to ones that contain the categories specified
+Python project for converting a video into a sequence of images filtered by classification. Simply add a trained model, input your classes and the video will be converted into a sequence of images filtered to ones that contain the specified classes
 
 ## Installation
 Download Pipenv and Python3.7
